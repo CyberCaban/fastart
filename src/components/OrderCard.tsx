@@ -104,7 +104,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   const canCancel = ["НОВЫЙ", "В РАБОТЕ", "ГОТОВО"].includes(order.status);
 
   const allDishesReady = order.dishes.every((dish) => dish.isReady);
-  const someDishesReady = order.dishes.some((dish) => dish.isReady);
 
   return (
     <div
@@ -209,7 +208,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         {order.status === "В РАБОТЕ" && !allDishesReady && (
           <div className="progress-info">
             <span className="text-muted">
-              Готово блюд: {order.dishes.filter((d) => d.isReady).length} из{" "}
+              Готово блюд: {order.dishes.filter((d) => d.isReady).length} из
               {order.dishes.length}
             </span>
           </div>

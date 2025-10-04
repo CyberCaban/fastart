@@ -1,6 +1,7 @@
-import React from 'react';
-import { useOrderStore } from '../store/orderStore';
-import OrderCard from './OrderCard';
+import React from "react";
+import { useOrderStore } from "../store/orderStore";
+import OrderCard from "./OrderCard";
+import { OrderStatus } from "../types";
 
 const OrderList: React.FC = () => {
   const { getFilteredOrders, isLoading, error } = useOrderStore();
@@ -23,8 +24,8 @@ const OrderList: React.FC = () => {
         <div className="error-message">
           <h3>Ошибка загрузки</h3>
           <p>{error}</p>
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={() => window.location.reload()}
           >
             Перезагрузить страницу
@@ -55,18 +56,25 @@ const OrderList: React.FC = () => {
   }, {} as Record<string, typeof orders>);
 
   // Sort orders within each group by creation time (newest first)
-  Object.keys(groupedOrders).forEach(status => {
-    groupedOrders[status].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  Object.keys(groupedOrders).forEach((status) => {
+    groupedOrders[status].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   });
 
   // Define status order for display
-  const statusOrder = ['НОВЫЙ', 'В РАБОТЕ', 'ГОТОВО', 'ВЫДАНО', 'ОТМЕНЕНО'];
+  const statusOrder: OrderStatus[] = [
+    "НОВЫЙ",
+    "В РАБОТЕ",
+    "ГОТОВО",
+    "ВЫДАНО",
+    "ОТМЕНЕНО",
+  ];
 
   return (
     <div className="order-list">
-      {statusOrder.map(status => {
+      {statusOrder.map((status) => {
         const statusOrders = groupedOrders[status];
         if (!statusOrders || statusOrders.length === 0) return null;
 
@@ -78,7 +86,7 @@ const OrderList: React.FC = () => {
               </h2>
             </div>
             <div className="order-group__content">
-              {statusOrders.map(order => (
+              {statusOrders.map((order) => (
                 <OrderCard key={order.id} order={order} />
               ))}
             </div>

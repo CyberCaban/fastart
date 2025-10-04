@@ -1,8 +1,13 @@
 // Типы для системы управления заказами кухни
 
-export type OrderStatus = 'НОВЫЙ' | 'В РАБОТЕ' | 'ГОТОВО' | 'ВЫДАНО' | 'ОТМЕНЕНО';
+export type OrderStatus =
+  | "НОВЫЙ"
+  | "В РАБОТЕ"
+  | "ГОТОВО"
+  | "ВЫДАНО"
+  | "ОТМЕНЕНО";
 
-export type OrderPriority = 'ОБЫЧНЫЙ' | 'СРОЧНЫЙ';
+export type OrderPriority = "ОБЫЧНЫЙ" | "СРОЧНЫЙ";
 
 export interface Dish {
   id: string;
@@ -40,22 +45,22 @@ export interface KitchenStats {
 
 export interface SocketEvents {
   // События от сервера
-  'order:new': (order: Order) => void;
-  'order:updated': (order: Order) => void;
-  'order:deleted': (orderId: string) => void;
-  'stats:updated': (stats: KitchenStats) => void;
-  'kitchen:status': (isOpen: boolean) => void;
-  'error': (error: { message: string; code?: string }) => void;
-  
+  "order:new": (order: Order) => void;
+  "order:updated": (order: Order) => void;
+  "order:deleted": (orderId: string) => void;
+  "stats:updated": (stats: KitchenStats) => void;
+  "kitchen:status": (isOpen: boolean) => void;
+  error: (error: { message: string; code?: string }) => void;
+
   // События к серверу
-  'order:accept': (orderId: string) => void;
-  'order:ready': (orderId: string) => void;
-  'order:issue': (orderId: string) => void;
-  'order:cancel': (orderId: string, reason?: string) => void;
-  'order:dish:ready': (orderId: string, dishId: string) => void;
-  'order:dish:unready': (orderId: string, dishId: string) => void;
-  'kitchen:emergency_stop': () => void;
-  'kitchen:reopen': () => void;
+  "order:accept": (orderId: string) => void;
+  "order:ready": (orderId: string) => void;
+  "order:issue": (orderId: string) => void;
+  "order:cancel": (orderId: string, reason?: string) => void;
+  "order:dish:ready": (orderId: string, dishId: string) => void;
+  "order:dish:unready": (orderId: string, dishId: string) => void;
+  "kitchen:emergency_stop": () => void;
+  "kitchen:reopen": () => void;
 }
 
 export interface OrderFilters {
@@ -87,13 +92,13 @@ export interface OrderStore extends AppState {
   setLoading: (loading: boolean) => void;
   setError: (error?: string) => void;
   setSocketConnected: (connected: boolean) => void;
-  
+
   // Computed
   getFilteredOrders: () => Order[];
   getActiveOrders: () => Order[];
   getHistoryOrders: () => Order[];
   getOrderById: (id: string) => Order | undefined;
-  
+
   // Actions
   acceptOrder: (orderId: string) => void;
   markDishReady: (orderId: string, dishId: string) => void;
