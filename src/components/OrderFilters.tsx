@@ -85,11 +85,10 @@ const OrderFilters: React.FC = () => {
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
-                  className={`filter-btn ${
-                    (filters.status || []).includes(option.value)
-                      ? "active"
-                      : ""
-                  }`}
+                  className={`filter-btn ${(filters.status || []).includes(option.value)
+                    ? "active"
+                    : ""
+                    }`}
                   onClick={() => handleStatusToggle(option.value)}
                   style={{
                     borderColor: (filters.status || []).includes(option.value)
@@ -114,11 +113,10 @@ const OrderFilters: React.FC = () => {
               {priorityOptions.map((option) => (
                 <button
                   key={option.value}
-                  className={`filter-btn ${
-                    (filters.priority || []).includes(option.value)
-                      ? "active"
-                      : ""
-                  }`}
+                  className={`filter-btn ${(filters.priority || []).includes(option.value)
+                    ? "active"
+                    : ""
+                    }`}
                   onClick={() => handlePriorityToggle(option.value)}
                 >
                   {option.label}
@@ -127,19 +125,6 @@ const OrderFilters: React.FC = () => {
             </div>
           </div>
 
-          {/* <div className="filter-group">
-            <label className="filter-label">Стол:</label>
-            <input
-              type="number"
-              placeholder="№ стола"
-              value={filters.tableNumber || ""}
-              onChange={handleTableFilter}
-              className="table-input"
-              min="1"
-              max="50"
-            />
-          </div>
- */}
           <button onClick={clearFilters} className="btn-secondary">
             Сбросить
           </button>
@@ -148,8 +133,7 @@ const OrderFilters: React.FC = () => {
 
       <div className="filters-info">
         <span className="text-muted">
-          Найдено заказов:
-          <strong className="text-accent">{filteredCount}</strong>
+          Найдено заказов: <strong className="text-accent">{filteredCount}</strong>
         </span>
       </div>
     </div>

@@ -1,5 +1,3 @@
-// Типы для системы управления заказами кухни
-
 export type OrderStatus =
   | "НОВЫЙ"
   | "В РАБОТЕ"
@@ -11,27 +9,29 @@ export type OrderPriority = "ОБЫЧНЫЙ" | "СРОЧНЫЙ";
 
 export interface Dish {
   id: string;
+  price: number;
   name: string;
   quantity: number;
   isReady: boolean;
-  preparationTime?: number; // в минутах
+  preparationTime?: number;
   category?: string;
 }
 
 export interface Order {
   id: string;
+  price: number;
   orderNumber: string;
   tableNumber: number;
   status: OrderStatus;
   priority: OrderPriority;
   dishes: Dish[];
-  createdAt: string; // ISO string
-  updatedAt: string; // ISO string
-  acceptedAt?: string; // когда принят в работу
-  completedAt?: string; // когда готов
-  issuedAt?: string; // когда выдан
-  estimatedTime?: number; // ожидаемое время приготовления в минутах
-  actualTime?: number; // фактическое время приготовления в минутах
+  createdAt: string;
+  updatedAt: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  issuedAt?: string;
+  estimatedTime?: number;
+  actualTime?: number;
   notes?: string;
 }
 
@@ -39,12 +39,11 @@ export interface KitchenStats {
   ordersToday: number;
   completedToday: number;
   pendingToday: number;
-  averagePreparationTime: number; // в минутах
+  averagePreparationTime: number;
   isKitchenOpen: boolean;
 }
 
 export interface SocketEvents {
-  // События от сервера
   "order:new": (order: Order) => void;
   "order:updated": (order: Order) => void;
   "order:deleted": (orderId: string) => void;
@@ -52,7 +51,6 @@ export interface SocketEvents {
   "kitchen:status": (isOpen: boolean) => void;
   error: (error: { message: string; code?: string }) => void;
 
-  // События к серверу
   "order:accept": (orderId: string) => void;
   "order:ready": (orderId: string) => void;
   "order:issue": (orderId: string) => void;
@@ -81,7 +79,6 @@ export interface AppState {
 }
 
 export interface OrderStore extends AppState {
-  // Actions
   setOrders: (orders: Order[]) => void;
   addOrder: (order: Order) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
@@ -93,13 +90,11 @@ export interface OrderStore extends AppState {
   setError: (error?: string) => void;
   setSocketConnected: (connected: boolean) => void;
 
-  // Computed
   getFilteredOrders: () => Order[];
   getActiveOrders: () => Order[];
   getHistoryOrders: () => Order[];
   getOrderById: (id: string) => Order | undefined;
 
-  // Actions
   acceptOrder: (orderId: string) => void;
   markDishReady: (orderId: string, dishId: string) => void;
   markDishUnready: (orderId: string, dishId: string) => void;

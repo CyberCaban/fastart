@@ -2,11 +2,12 @@ import { io, Socket } from "socket.io-client";
 import type { Order, KitchenStats, SocketEvents } from "../types";
 import { useOrderStore } from "../store/orderStore";
 
+const ONE_SECOND = 1000;
 class SocketService {
   private socket: Socket<SocketEvents> | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000; // 1 second
+  private reconnectDelay = ONE_SECOND;
   private isConnecting = false;
 
   connect(url: string = "ws://localhost:3001"): Promise<void> {
@@ -61,7 +62,6 @@ class SocketService {
           store.setSocketConnected(false);
 
           if (reason === "io server disconnect") {
-            // Server disconnected, try to reconnect
             this.handleReconnect();
           }
         });
@@ -78,46 +78,38 @@ class SocketService {
 
     const store = useOrderStore.getState();
 
-    // Handle new orders
     this.socket.on("order:new", (order: Order) => {
       console.log("New order received:", order);
       store.addOrder(order);
 
-      // Play notification sound for new orders
       this.playNotificationSound();
 
-      // Show browser notification if permission granted
       this.showBrowserNotification(
         `Новый заказ #${order.orderNumber}`,
         `Стол ${order.tableNumber}`
       );
     });
 
-    // Handle order updates
     this.socket.on("order:updated", (order: Order) => {
       console.log("Order updated:", order);
       store.updateOrder(order.id, order);
     });
 
-    // Handle order deletion
     this.socket.on("order:deleted", (orderId: string) => {
       console.log("Order deleted:", orderId);
       store.removeOrder(orderId);
     });
 
-    // Handle stats updates
     this.socket.on("stats:updated", (stats: KitchenStats) => {
       console.log("Stats updated:", stats);
       store.setStats(stats);
     });
 
-    // Handle kitchen status
     this.socket.on("kitchen:status", (isOpen: boolean) => {
       console.log("Kitchen status:", isOpen);
       store.setStats({ ...store.stats, isKitchenOpen: isOpen });
     });
 
-    // Handle errors
     this.socket.on("error", (error: { message: string; code?: string }) => {
       console.error("Socket error:", error);
       store.setError(`Ошибка сервера: ${error.message}`);
@@ -142,12 +134,10 @@ class SocketService {
 
     setTimeout(() => {
       this.connect().catch(() => {
-        // Reconnection failed, will be handled by handleReconnect
       });
     }, delay);
   }
 
-  // Order actions
   acceptOrder(orderId: string): void {
     const isDev = import.meta.env.DEV;
 
@@ -262,7 +252,6 @@ class SocketService {
 
   private playNotificationSound(): void {
     try {
-      // Create a simple beep sound using Web Audio API
       const audioContext = new (window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext })
           .webkitAudioContext)();
@@ -329,6 +318,5 @@ class SocketService {
   }
 }
 
-// Export singleton instance
 export const socketService = new SocketService();
 export default socketService;
