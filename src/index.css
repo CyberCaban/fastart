@@ -69,6 +69,7 @@
 /* Base styles */
 * {
   box-sizing: border-box;
+    transition: 400ms all;
 }
 
 body {

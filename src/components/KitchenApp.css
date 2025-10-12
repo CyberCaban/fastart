@@ -54,6 +54,7 @@
 
 .header__stats {
     display: flex;
+    flex-direction: row;
     gap: var(--spacing-xl);
 }
 
@@ -173,6 +174,7 @@
     flex-wrap: wrap;
     gap: var(--spacing-lg);
     align-items: center;
+    height: calc(3 * var(--spacing-lg));
 }
 
 .filter-group {
@@ -211,6 +213,14 @@
     background-color: var(--button-primary);
     border-color: var(--button-primary);
     color: var(--bg-primary);
+}
+
+.filters-clear {
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    margin-left: auto;
+    font-size: var(--font-size-xl);
+    align-self: stretch;
 }
 
 .table-input {
@@ -529,7 +539,6 @@
 }
 
 .stats-grid {
-    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
@@ -539,7 +548,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     background-color: var(--bg-card);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-primary);
@@ -695,10 +704,17 @@
     .filters-section {
         flex-direction: column;
         align-items: stretch;
+        height: auto;
     }
 
     .filter-buttons {
         justify-content: center;
+    }
+
+    .filters-clear {
+        display: flex;
+        justify-content: center;
+        margin-left: 0;
     }
 
     .order-card__header {
@@ -781,7 +797,7 @@
     }
 
     .stat-card {
-        padding: var(--spacing-xs);
+        padding: var(--spacing-sm);
     }
 
     .active-stat {

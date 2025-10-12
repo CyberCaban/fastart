@@ -125,7 +125,7 @@ const OrderFilters: React.FC = () => {
             </div>
           </div>
 
-          <button onClick={clearFilters} className="btn-secondary">
+          <button onClick={clearFilters} className="btn-secondary filters-clear">
             Сбросить
           </button>
         </div>
