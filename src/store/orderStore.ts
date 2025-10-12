@@ -36,6 +36,14 @@ export const useOrderStore = create<OrderStore>()(
 
         setOrders: (orders) => set({ orders }),
 
+          clearStore: () => set({ orders: [], stats: {
+              ordersToday: 0,
+                  completedToday: 0,
+                  pendingToday: 0,
+                  averagePreparationTime: 0,
+                  isKitchenOpen: false,
+              } }),
+
         addOrder: (order) =>
           set((state) => ({
             orders: [order, ...state.orders.filter((o) => o.id !== order.id)],

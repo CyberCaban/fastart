@@ -80,6 +80,7 @@ export interface AppState {
 
 export interface OrderStore extends AppState {
   setOrders: (orders: Order[]) => void;
+  clearStore: () => void;
   addOrder: (order: Order) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
   removeOrder: (orderId: string) => void;

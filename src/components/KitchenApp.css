@@ -99,7 +99,7 @@
 }
 
 .stat-label {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     line-height: 1.2;
 }
@@ -137,7 +137,7 @@
 }
 
 .active-stat__label {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     text-align: center;
 }
@@ -290,7 +290,7 @@
 }
 
 .priority-badge {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-weight: 700;
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-sm);

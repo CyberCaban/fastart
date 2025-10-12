@@ -8,6 +8,7 @@ const Header: React.FC = () => {
         socketConnected,
         getActiveOrders,
         orders,
+        clearStore
     } = useOrderStore();
 
     const handleEmergencyStop = () => {
@@ -78,6 +79,20 @@ const Header: React.FC = () => {
         a.click()
     }
 
+    const clearCache = () => {
+        if (confirm("Вы собираетесь очистить кеш. Вы уверены?")) clearStore()
+    }
+    const ClearCacheBtn = ({isKitchenOpen}: {isKitchenOpen: boolean}) => {
+        return  !isKitchenOpen ?
+        <button
+            className="btn-danger"
+            onClick={clearCache}
+        >
+            Очистить кеш
+        </button>: null
+    }
+
+
     return (
         <header className="header">
             <div className="header__top">
@@ -99,6 +114,7 @@ const Header: React.FC = () => {
                     >
                         Загрузить отчет
                     </button>
+                    <ClearCacheBtn isKitchenOpen={stats.isKitchenOpen}/>
                     <button
                         className={`btn-danger ${!stats.isKitchenOpen ? "btn-primary" : ""}`}
                         onClick={handleEmergencyStop}
