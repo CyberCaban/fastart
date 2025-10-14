@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import type { Order, KitchenStats, SocketEvents, Dish } from "../types";
+import type { Order, KitchenStats, SocketEvents, Dish, OrderStatus } from "../types";
 import { useOrderStore } from "../store/orderStore";
 import axios from "axios";
 
@@ -17,17 +17,26 @@ type NewOrder = {
   city: string,
   created_at: string,
   paid_price: number,
+  is_delivery: boolean,
+  is_assembled: boolean,
   products: Products[]
 }
 
 function processMessage(data: NewOrder[]): Order[] {
+  function processStatus(is_assembled: boolean | null): OrderStatus {
+    switch (is_assembled) {
+      case true: return "ГОТОВО"
+      case false: return "ОТМЕНЕНО"
+      case null: return "НОВЫЙ"
+    }
+  }
   return data.map(o => {
     return {
       id: o.id.toString(),
       price: o.paid_price,
       orderNumber: o.id.toString(),
       tableNumber: o.id,
-      status: "НОВЫЙ",
+      status: processStatus(o.is_assembled),
       priority: "ОБЫЧНЫЙ",
       dishes: o.products.map(p => {
         return {
@@ -98,7 +107,7 @@ class SocketService {
           console.error("Socket connection error:", error);
           this.isConnecting = false;
           store.setSocketConnected(false);
-          store.setError(`Ошибка подключения: ${error}`);
+          store.setError(`Ошибка подключения: сокет не смог подключиться`);
           reject(error);
         });
 
