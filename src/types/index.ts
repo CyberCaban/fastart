@@ -59,6 +59,8 @@ export interface SocketEvents {
   "order:dish:unready": (orderId: string, dishId: string) => void;
   "kitchen:emergency_stop": () => void;
   "kitchen:reopen": () => void;
+  
+  "message": (message: string) => void;
 }
 
 export interface OrderFilters {

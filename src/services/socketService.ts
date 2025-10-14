@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import type { Order, KitchenStats, SocketEvents } from "../types";
 import { useOrderStore } from "../store/orderStore";
+import axios from "axios";
 
 const ONE_SECOND = 1000;
 class SocketService {
@@ -9,8 +10,12 @@ class SocketService {
   private maxReconnectAttempts = 5;
   private reconnectDelay = ONE_SECOND;
   private isConnecting = false;
+  private shop_id = import.meta.env.VITE_SHOP_ID;
+  private password = import.meta.env.VITE_PASSWORD;
+  private url: string | null = null;
 
   connect(url: string = "ws://localhost:3001"): Promise<void> {
+    this.url = url;
     return new Promise((resolve, reject) => {
       const isDev = import.meta.env.DEV;
       if (isDev) {
@@ -42,6 +47,7 @@ class SocketService {
 
         this.socket.on("connect", () => {
           console.log("Connected to kitchen socket server");
+          this.socket?.send({ shop_id: this.shop_id, password: this.password });
           this.reconnectAttempts = 0;
           this.isConnecting = false;
           store.setSocketConnected(true);
@@ -77,6 +83,11 @@ class SocketService {
     if (!this.socket) return;
 
     const store = useOrderStore.getState();
+
+    this.socket.on("message", (message: string) => {
+      // Заказы которые нужно приготовить
+      console.log("Message received:", message);
+    });
 
     this.socket.on("order:new", (order: Order) => {
       console.log("New order received:", order);
@@ -149,6 +160,7 @@ class SocketService {
     if (!isDev) {
       this.socket?.emit("order:accept", orderId);
     }
+    axios.put(`${this.url}/assemble/${orderId}`, { password: this.password });
     useOrderStore.getState().acceptOrder(orderId);
   }
 
