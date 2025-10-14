@@ -116,9 +116,8 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
                 <div className="order-info">
                     <h3 className="order-number">Заказ #{order.orderNumber}</h3>
                     <div className="order-meta">
-                        <span className="table-info">Стол {order.tableNumber}</span>
                         <span className="time-info">
-              • Создан {formatTime(order.createdAt)}
+              Создан {formatTime(order.createdAt)}
             </span>
                         {order.acceptedAt && (
                             <span className="time-info">

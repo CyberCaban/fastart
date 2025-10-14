@@ -16,11 +16,11 @@ const Header: React.FC = () => {
             if (
                 window.confirm("Вы уверены, что хотите экстренно остановить кухню?")
             ) {
-                socketService.emergencyStop();
+                socketService.stopKitchen();
             }
         } else {
             if (window.confirm("Вы уверены, что хотите открыть кухню?")) {
-                socketService.reopenKitchen();
+                socketService.openKitchen();
             }
         }
     };

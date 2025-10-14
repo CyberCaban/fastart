@@ -14,20 +14,17 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Use mock socket for development
-  useMockSocket();
+  // useMockSocket();
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
         setLoading(true);
 
-        // Request notification permission
-        await socketService.requestNotificationPermission();
-
         // Check if we're in development mode or if real server is available
         const useMockMode = import.meta.env.DEV;
 
-        if (useMockMode) {
+        if (!useMockMode) {
           console.log("Development mode: Using mock data");
           setSocketConnected(false);
 
@@ -43,23 +40,24 @@ function App() {
         } else {
           // Try to connect to real socket server in production
           try {
-            await socketService.connect("ws://localhost:3001");
+            await socketService.connect("wss://shaurma-jan.ru/v1/admin/active_assembly_orders");
             console.log("Connected to real socket server");
           } catch (error) {
-            console.warn(
-              "Could not connect to socket server, falling back to mock data:",
-              error
-            );
-            setSocketConnected(false);
-
-            // Load mock data as fallback
-            setOrders(mockOrders);
-            setStats(mockStats);
-
-            setTimeout(() => {
-              console.log("Fallback mock socket connection established");
-              setSocketConnected(true);
-            }, 500);
+            //
+            //   console.warn(
+            //     "Could not connect to socket server, falling back to mock data:",
+            //     error
+            //   );
+            //   setSocketConnected(false);
+            //
+            //   // Load mock data as fallback
+            //   setOrders(mockOrders);
+            //   setStats(mockStats);
+            //
+            //   setTimeout(() => {
+            //     console.log("Fallback mock socket connection established");
+            //     setSocketConnected(true);
+            //   }, 500);
           }
         }
 
