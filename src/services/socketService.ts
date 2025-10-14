@@ -132,8 +132,8 @@ class SocketService {
   }
 
   private assembleOrderRequest(id: string) {
-    const url = new URL(`${this.adminUrl}/assemble`)
-    this.prepareUrl(url, id)
+    const url = new URL(`${this.adminUrl}/assemble/${id}`)
+    // this.prepareUrl(url, id)
 
     const passwordJson = JSON.stringify({ password: this.password })
     axios.put(url.toString(), passwordJson, {
@@ -143,14 +143,14 @@ class SocketService {
     })
   }
   private kitchenOpenRequest(shop_id: string) {
-    const url = new URL(`${this.adminUrl}/open`)
-    this.prepareUrl(url, shop_id)
+    const url = new URL(`${this.adminUrl}/open/${shop_id}`)
+    // this.prepareUrl(url, shop_id)
     const passwordJson = JSON.stringify({ password: this.password })
     axios.put(url.toString(), passwordJson)
   }
   private kitchenCloseRequest(shop_id: string) {
-    const url = new URL(`${this.adminUrl}/close`)
-    this.prepareUrl(url, shop_id)
+    const url = new URL(`${this.adminUrl}/close/${shop_id}`)
+    // this.prepareUrl(url, shop_id)
     const passwordJson = JSON.stringify({ password: this.password })
     axios.put(url.toString(), passwordJson)
   }
