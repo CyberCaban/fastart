@@ -13,54 +13,16 @@ function App() {
     useOrderStore();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Use mock socket for development
-  // useMockSocket();
-
   useEffect(() => {
     const initializeApp = async () => {
       try {
         setLoading(true);
-
-        // Check if we're in development mode or if real server is available
-        const useMockMode = import.meta.env.DEV;
-
-        if (!useMockMode) {
-          console.log("Development mode: Using mock data");
-          setSocketConnected(false);
-
-          // Load mock data for development
-          setOrders(mockOrders);
-          setStats(mockStats);
-
-          // Simulate socket connection for testing
-          setTimeout(() => {
-            console.log("Mock socket connection established");
-            setSocketConnected(true);
-          }, 500);
-        } else {
-          // Try to connect to real socket server in production
           try {
             await socketService.connect("wss://shaurma-jan.ru/v1/admin/active_assembly_orders");
             console.log("Connected to real socket server");
-          } catch (error) {
-            //
-            //   console.warn(
-            //     "Could not connect to socket server, falling back to mock data:",
-            //     error
-            //   );
-            //   setSocketConnected(false);
-            //
-            //   // Load mock data as fallback
-            //   setOrders(mockOrders);
-            //   setStats(mockStats);
-            //
-            //   setTimeout(() => {
-            //     console.log("Fallback mock socket connection established");
-            //     setSocketConnected(true);
-            //   }, 500);
+          } catch (error) { 
+            console.log("Failed to connect to socketService");
           }
-        }
-
         setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize app:", error);
