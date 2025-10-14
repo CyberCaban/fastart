@@ -71,7 +71,7 @@ const OrderFilters: React.FC = () => {
         <div className="search-section">
           <input
             type="text"
-            placeholder="Поиск по столу или номеру заказа..."
+            placeholder="Поиск по номеру заказа..."
             value={filters.searchQuery || ""}
             onChange={handleSearchChange}
             className="search-input"
@@ -107,23 +107,23 @@ const OrderFilters: React.FC = () => {
             </div>
           </div>
 
-          <div className="filter-group">
-            <label className="filter-label">Приоритет:</label>
-            <div className="filter-buttons">
-              {priorityOptions.map((option) => (
-                <button
-                  key={option.value}
-                  className={`filter-btn ${(filters.priority || []).includes(option.value)
-                    ? "active"
-                    : ""
-                    }`}
-                  onClick={() => handlePriorityToggle(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* <div className="filter-group"> */}
+          {/*   <label className="filter-label">Приоритет:</label> */}
+          {/*   <div className="filter-buttons"> */}
+          {/*     {priorityOptions.map((option) => ( */}
+          {/*       <button */}
+          {/*         key={option.value} */}
+          {/*         className={`filter-btn ${(filters.priority || []).includes(option.value) */}
+          {/*           ? "active" */}
+          {/*           : "" */}
+          {/*           }`} */}
+          {/*         onClick={() => handlePriorityToggle(option.value)} */}
+          {/*       > */}
+          {/*         {option.label} */}
+          {/*       </button> */}
+          {/*     ))} */}
+          {/*   </div> */}
+          {/* </div> */}
 
           <button onClick={clearFilters} className="btn-secondary filters-clear">
             Сбросить

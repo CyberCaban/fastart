@@ -36,13 +36,15 @@ export const useOrderStore = create<OrderStore>()(
 
         setOrders: (orders) => set({ orders }),
 
-          clearStore: () => set({ orders: [], stats: {
-              ordersToday: 0,
-                  completedToday: 0,
-                  pendingToday: 0,
-                  averagePreparationTime: 0,
-                  isKitchenOpen: false,
-              } }),
+        clearStore: () => set({
+          orders: [], stats: {
+            ordersToday: 0,
+            completedToday: 0,
+            pendingToday: 0,
+            averagePreparationTime: 0,
+            isKitchenOpen: false,
+          }
+        }),
 
         addOrder: (order) =>
           set((state) => ({
@@ -80,6 +82,7 @@ export const useOrderStore = create<OrderStore>()(
 
         getFilteredOrders: () => {
           const { orders, filters } = get();
+
           return orders.filter((order) => {
             if (filters.status && filters.status.length > 0) {
               if (!filters.status.includes(order.status)) return false;
@@ -202,13 +205,13 @@ export const useOrderStore = create<OrderStore>()(
           });
         },
 
-        emergencyStop: () => {
+        stopKitchen: () => {
           set((state) => ({
             stats: { ...state.stats, isKitchenOpen: false },
           }));
         },
 
-        reopenKitchen: () => {
+        openKitchen: () => {
           set((state) => ({
             stats: { ...state.stats, isKitchenOpen: true },
           }));

@@ -59,7 +59,7 @@ export interface SocketEvents {
   "order:dish:unready": (orderId: string, dishId: string) => void;
   "kitchen:emergency_stop": () => void;
   "kitchen:reopen": () => void;
-  
+
   "message": (message: string) => void;
 }
 
@@ -104,6 +104,6 @@ export interface OrderStore extends AppState {
   markOrderReady: (orderId: string) => void;
   issueOrder: (orderId: string) => void;
   cancelOrder: (orderId: string, reason?: string) => void;
-  emergencyStop: () => void;
-  reopenKitchen: () => void;
+  stopKitchen: () => void;
+  openKitchen: () => void;
 }

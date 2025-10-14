@@ -1,29 +1,67 @@
 import { io, Socket } from "socket.io-client";
-import type { Order, KitchenStats, SocketEvents } from "../types";
+import type { Order, KitchenStats, SocketEvents, Dish } from "../types";
 import { useOrderStore } from "../store/orderStore";
 import axios from "axios";
 
+type Products = {
+  id: number,
+  title: string,
+  quantity: number,
+}
+
+type NewOrder = {
+  id: number,
+  name: string,
+  phone_number: string,
+  address: string,
+  city: string,
+  created_at: string,
+  paid_price: number,
+  products: Products[]
+}
+
+function processMessage(data: NewOrder[]): Order[] {
+  return data.map(o => {
+    return {
+      id: o.id.toString(),
+      price: o.paid_price,
+      orderNumber: o.id.toString(),
+      tableNumber: o.id,
+      status: "НОВЫЙ",
+      priority: "ОБЫЧНЫЙ",
+      dishes: o.products.map(p => {
+        return {
+          id: p.id.toString(),
+          price: 0,
+          name: p.title,
+          isReady: false,
+          quantity: p.quantity
+        } as Dish
+      }),
+      createdAt: o.created_at,
+      updatedAt: o.created_at
+    } as Order
+  }) as Order[]
+}
+
 const ONE_SECOND = 1000;
 class SocketService {
-  private socket: Socket<SocketEvents> | null = null;
+  private socket: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = ONE_SECOND;
   private isConnecting = false;
-  private shop_id = import.meta.env.VITE_SHOP_ID;
+  private shop_id = +import.meta.env.VITE_SHOP_ID;
   private password = import.meta.env.VITE_PASSWORD;
-  private url: string | null = null;
+  private wsUrl: string | null = null;
+  private adminUrl = import.meta.env.VITE_API_URL;
 
-  connect(url: string = "ws://localhost:3001"): Promise<void> {
-    this.url = url;
+  connect(url: string): Promise<void> {
+    this.wsUrl = url;
+    console.log(url);
+
     return new Promise((resolve, reject) => {
-      const isDev = import.meta.env.DEV;
-      if (isDev) {
-        reject(new Error("Development mode: skipping real socket connection"));
-        return;
-      }
-
-      if (this.socket?.connected) {
+      if (this.socket?.OPEN) {
         resolve();
         return;
       }
@@ -37,17 +75,18 @@ class SocketService {
       const store = useOrderStore.getState();
 
       try {
-        this.socket = io(url, {
-          transports: ["websocket"],
-          timeout: 10000,
-          forceNew: true,
-        });
+        this.socket = new WebSocket(url)
 
-        this.setupEventListeners();
+        this.socket.addEventListener("message", (ev) => {
+          const data = JSON.parse(ev.data) as NewOrder[]
+          const processed = processMessage(data)
+          store.setOrders(processed)
+          this.playNotificationSound();
+        })
 
-        this.socket.on("connect", () => {
+        this.socket.addEventListener("open", () => {
           console.log("Connected to kitchen socket server");
-          this.socket?.send({ shop_id: this.shop_id, password: this.password });
+          this.socket?.send(JSON.stringify({ shop_id: this.shop_id, password: this.password }));
           this.reconnectAttempts = 0;
           this.isConnecting = false;
           store.setSocketConnected(true);
@@ -55,21 +94,19 @@ class SocketService {
           resolve();
         });
 
-        this.socket.on("connect_error", (error) => {
+        this.socket.addEventListener("error", (error) => {
           console.error("Socket connection error:", error);
           this.isConnecting = false;
           store.setSocketConnected(false);
-          store.setError(`Ошибка подключения: ${error.message}`);
+          store.setError(`Ошибка подключения: ${error}`);
           reject(error);
         });
 
-        this.socket.on("disconnect", (reason) => {
+        this.socket.addEventListener("close", (reason) => {
           console.log("Socket disconnected:", reason);
           store.setSocketConnected(false);
 
-          if (reason === "io server disconnect") {
-            this.handleReconnect();
-          }
+          this.handleReconnect();
         });
       } catch (error) {
         this.isConnecting = false;
@@ -79,52 +116,34 @@ class SocketService {
     });
   }
 
-  private setupEventListeners(): void {
-    if (!this.socket) return;
+  private prepareUrl(url: URL, id: string) {
+    const params = new URLSearchParams(url.search)
+    params.set("id", id)
+    url.search = params.toString()
+  }
 
-    const store = useOrderStore.getState();
+  private assembleOrderRequest(id: string) {
+    const url = new URL(`${this.adminUrl}/assemble`)
+    this.prepareUrl(url, id)
 
-    this.socket.on("message", (message: string) => {
-      // Заказы которые нужно приготовить
-      console.log("Message received:", message);
-    });
-
-    this.socket.on("order:new", (order: Order) => {
-      console.log("New order received:", order);
-      store.addOrder(order);
-
-      this.playNotificationSound();
-
-      this.showBrowserNotification(
-        `Новый заказ #${order.orderNumber}`,
-        `Стол ${order.tableNumber}`
-      );
-    });
-
-    this.socket.on("order:updated", (order: Order) => {
-      console.log("Order updated:", order);
-      store.updateOrder(order.id, order);
-    });
-
-    this.socket.on("order:deleted", (orderId: string) => {
-      console.log("Order deleted:", orderId);
-      store.removeOrder(orderId);
-    });
-
-    this.socket.on("stats:updated", (stats: KitchenStats) => {
-      console.log("Stats updated:", stats);
-      store.setStats(stats);
-    });
-
-    this.socket.on("kitchen:status", (isOpen: boolean) => {
-      console.log("Kitchen status:", isOpen);
-      store.setStats({ ...store.stats, isKitchenOpen: isOpen });
-    });
-
-    this.socket.on("error", (error: { message: string; code?: string }) => {
-      console.error("Socket error:", error);
-      store.setError(`Ошибка сервера: ${error.message}`);
-    });
+    const passwordJson = JSON.stringify({ password: this.password })
+    axios.put(url.toString(), passwordJson, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+  private kitchenOpenRequest(shop_id: string) {
+    const url = new URL(`${this.adminUrl}/open`)
+    this.prepareUrl(url, shop_id)
+    const passwordJson = JSON.stringify({ password: this.password })
+    axios.put(url.toString(), passwordJson)
+  }
+  private kitchenCloseRequest(shop_id: string) {
+    const url = new URL(`${this.adminUrl}/close`)
+    this.prepareUrl(url, shop_id)
+    const passwordJson = JSON.stringify({ password: this.password })
+    axios.put(url.toString(), passwordJson)
   }
 
   private handleReconnect(): void {
@@ -144,122 +163,85 @@ class SocketService {
     );
 
     setTimeout(() => {
-      this.connect().catch(() => {
+      this.connect(this.wsUrl!).catch(() => {
       });
     }, delay);
   }
 
   acceptOrder(orderId: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:accept", orderId);
-    }
-    axios.put(`${this.url}/assemble/${orderId}`, { password: this.password });
+    axios.put(`${this.wsUrl}/assemble/${orderId}`, { password: this.password });
     useOrderStore.getState().acceptOrder(orderId);
   }
 
   markDishReady(orderId: string, dishId: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:dish:ready", orderId, dishId);
-    }
     useOrderStore.getState().markDishReady(orderId, dishId);
   }
 
   markDishUnready(orderId: string, dishId: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:dish:unready", orderId, dishId);
-    }
     useOrderStore.getState().markDishUnready(orderId, dishId);
   }
 
   markOrderReady(orderId: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:ready", orderId);
-    }
     useOrderStore.getState().markOrderReady(orderId);
   }
 
   issueOrder(orderId: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:issue", orderId);
-    }
+    this.assembleOrderRequest(orderId)
     useOrderStore.getState().issueOrder(orderId);
   }
 
   cancelOrder(orderId: string, reason?: string): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("order:cancel", orderId, reason);
-    }
     useOrderStore.getState().cancelOrder(orderId, reason);
   }
 
-  emergencyStop(): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+  stopKitchen(): void {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("kitchen:emergency_stop");
-    }
-    useOrderStore.getState().emergencyStop();
+    this.kitchenCloseRequest(this.shop_id.toString())
+    useOrderStore.getState().stopKitchen();
   }
 
-  reopenKitchen(): void {
-    const isDev = import.meta.env.DEV;
-
-    if (!isDev && !this.socket?.connected) {
+  openKitchen(): void {
+    if (!this.socket?.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    if (!isDev) {
-      this.socket?.emit("kitchen:reopen");
-    }
-    useOrderStore.getState().reopenKitchen();
+    this.kitchenOpenRequest(this.shop_id.toString())
+    useOrderStore.getState().openKitchen();
   }
 
   private playNotificationSound(): void {
@@ -289,44 +271,16 @@ class SocketService {
     }
   }
 
-  private showBrowserNotification(title: string, body: string): void {
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(title, {
-        body,
-        icon: "/vite.svg",
-        tag: "kitchen-order",
-      });
-    }
-  }
-
-  async requestNotificationPermission(): Promise<boolean> {
-    if (!("Notification" in window)) {
-      console.warn("This browser does not support notifications");
-      return false;
-    }
-
-    if (Notification.permission === "granted") {
-      return true;
-    }
-
-    if (Notification.permission === "denied") {
-      return false;
-    }
-
-    const permission = await Notification.requestPermission();
-    return permission === "granted";
-  }
-
   disconnect(): void {
     if (this.socket) {
-      this.socket.disconnect();
+      this.socket.close();
       this.socket = null;
       useOrderStore.getState().setSocketConnected(false);
     }
   }
 
   isConnected(): boolean {
-    return this.socket?.connected || false;
+    return this.socket?.OPEN === 1 || false;
   }
 }
 
