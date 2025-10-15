@@ -45,7 +45,7 @@ export const useMockSocket = () => {
       // Show browser notification
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification(`Новый заказ #${newOrder.orderNumber}`, {
-          body: `Стол ${newOrder.tableNumber}`,
+          body: `Стол ${newOrder.isDelivery}`,
           icon: "/vite.svg",
           tag: "kitchen-order",
         });

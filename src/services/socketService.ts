@@ -18,7 +18,7 @@ type NewOrder = {
   created_at: string,
   paid_price: number,
   is_delivery: boolean,
-  is_assembled: boolean,
+  is_assembled?: boolean,
   products: Products[]
 }
 
@@ -35,8 +35,8 @@ function processMessage(data: NewOrder[]): Order[] {
       id: o.id.toString(),
       price: o.paid_price,
       orderNumber: o.id.toString(),
-      tableNumber: o.id,
-      status: processStatus(o.is_assembled),
+      isDelivery: o.is_delivery,
+      status: processStatus(o.is_assembled ?? null),
       priority: "ОБЫЧНЫЙ",
       dishes: o.products.map(p => {
         return {
@@ -57,7 +57,7 @@ const ONE_SECOND = 1000;
 class SocketService {
   private socket: WebSocket | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 1000;
   private reconnectDelay = ONE_SECOND;
   private isConnecting = false;
   private shop_id = +import.meta.env.VITE_SHOP_ID;
@@ -67,10 +67,8 @@ class SocketService {
 
   connect(url: string): Promise<void> {
     this.wsUrl = url;
-    console.log(url);
-
     return new Promise((resolve, reject) => {
-      if (this.socket?.OPEN) {
+      if (this.socket?.readyState === WebSocket.OPEN) {
         resolve();
         return;
       }
@@ -89,7 +87,13 @@ class SocketService {
         this.socket.addEventListener("message", (ev) => {
           const data = JSON.parse(ev.data) as NewOrder[]
           const processed = processMessage(data)
-          store.setOrders(processed)
+          const localOrders = store.orders;
+
+          for (const p of processed) {
+            const old = localOrders.find((a) => a.id === p.id)
+            if (old === undefined) store.addOrder(p)
+          }
+
           this.playNotificationSound();
         })
 
@@ -165,30 +169,30 @@ class SocketService {
     }
 
     this.reconnectAttempts++;
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
+    const delay = this.reconnectDelay; // Exponential backoff
 
     console.log(
       `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`
     );
 
     setTimeout(() => {
-      this.connect(this.wsUrl!).catch(() => {
+      this.connect(this.wsUrl!).catch((e) => {
+        console.error(`Reconnect failed: ${JSON.stringify(e)}`)
       });
     }, delay);
   }
 
-  acceptOrder(orderId: string): void {
-    if (!this.socket?.OPEN) {
+  acceptOrder(orderId: string){
+    if (this.socket?.readyState !== WebSocket.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    axios.put(`${this.wsUrl}/assemble/${orderId}`, { password: this.password });
     useOrderStore.getState().acceptOrder(orderId);
   }
 
   markDishReady(orderId: string, dishId: string): void {
-    if (!this.socket?.OPEN) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
@@ -197,7 +201,7 @@ class SocketService {
   }
 
   markDishUnready(orderId: string, dishId: string): void {
-    if (!this.socket?.OPEN) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
@@ -205,27 +209,41 @@ class SocketService {
     useOrderStore.getState().markDishUnready(orderId, dishId);
   }
 
-  markOrderReady(orderId: string): void {
-    if (!this.socket?.OPEN) {
+  async markOrderReady(orderId: string) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
+    }
+
+    try {
+      axios.put(`${this.adminUrl}/assemble/${orderId}`, { password: this.password })
+    } catch (e) {
+      return e as Error
     }
 
     useOrderStore.getState().markOrderReady(orderId);
   }
 
-  issueOrder(orderId: string): void {
-    if (!this.socket?.OPEN) {
+  async issueOrder(orderId: string) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
 
-    this.assembleOrderRequest(orderId)
+    // если самовывоз
+    if (!useOrderStore.getState().getOrderById(orderId)?.isDelivery) {
+      try {
+        axios.put(`${this.adminUrl}/delivery/${orderId}`, { password: this.password })
+      } catch (e) {
+        return e as Error
+      }
+    }
+    // this.assembleOrderRequest(orderId)
     useOrderStore.getState().issueOrder(orderId);
   }
 
   cancelOrder(orderId: string, reason?: string): void {
-    if (!this.socket?.OPEN) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
@@ -234,7 +252,7 @@ class SocketService {
   }
 
   stopKitchen(): void {
-    if (!this.socket?.OPEN) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
@@ -244,7 +262,7 @@ class SocketService {
   }
 
   openKitchen(): void {
-    if (!this.socket?.OPEN) {
+    if (!this.isConnected()) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
     }
@@ -289,7 +307,7 @@ class SocketService {
   }
 
   isConnected(): boolean {
-    return this.socket?.OPEN === 1 || false;
+    return this.socket?.readyState === WebSocket.OPEN || false;
   }
 }
 

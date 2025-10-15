@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useOrderStore } from "../store/orderStore";
 import OrderCard from "./OrderCard";
 import { OrderStatus } from "../types";
 
+const ONE_MIN = 60000;
+
 const OrderList: React.FC = () => {
   const { getFilteredOrders, isLoading, error } = useOrderStore();
   const orders = getFilteredOrders();
+  const [lastUpdateTime, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date())
+    }, ONE_MIN)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [])
 
   if (isLoading) {
     return (
@@ -18,22 +31,22 @@ const OrderList: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="order-list error">
-        <div className="error-message">
-          <h3>Ошибка загрузки</h3>
-          <p>{error}</p>
-          <button
-            className="btn-primary"
-            onClick={() => window.location.reload()}
-          >
-            Перезагрузить страницу
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="order-list error">
+  //       <div className="error-message">
+  //         <h3>Ошибка загрузки</h3>
+  //         <p>{error}</p>
+  //         <button
+  //           className="btn-primary"
+  //           onClick={() => window.location.reload()}
+  //         >
+  //           Перезагрузить страницу
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (orders.length === 0) {
     return (

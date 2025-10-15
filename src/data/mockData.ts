@@ -109,7 +109,7 @@ export const mockOrders: Order[] = [
     id: "1",
     price: 2100.3,
     orderNumber: "1001",
-    tableNumber: 5,
+    isDelivery: true,
     status: "НОВЫЙ",
     priority: "ОБЫЧНЫЙ",
     dishes: [
@@ -146,7 +146,7 @@ export const mockOrders: Order[] = [
     id: "2",
     price: 1000,
     orderNumber: "1002",
-    tableNumber: 12,
+    isDelivery: false,
     status: "В РАБОТЕ",
     priority: "СРОЧНЫЙ",
     dishes: [
@@ -184,7 +184,7 @@ export const mockOrders: Order[] = [
     id: "3",
     price: 4000,
     orderNumber: "1003",
-    tableNumber: 7,
+    isDelivery: true,
     status: "ГОТОВО",
     priority: "ОБЫЧНЫЙ",
     dishes: [
@@ -224,7 +224,7 @@ export const mockOrders: Order[] = [
     id: "4",
     price: 4679,
     orderNumber: "1004",
-    tableNumber: 3,
+    isDelivery: false,
     status: "ВЫДАНО",
     priority: "ОБЫЧНЫЙ",
     dishes: [
@@ -249,7 +249,7 @@ export const mockOrders: Order[] = [
     id: "5",
     price: 463.6,
     orderNumber: "1005",
-    tableNumber: 8,
+    isDelivery: true,
     status: "ОТМЕНЕНО",
     priority: "ОБЫЧНЫЙ",
     dishes: [
@@ -295,8 +295,6 @@ export const generateRandomOrder = (): Order => {
     }));
 
   const priority = priorities[Math.floor(Math.random() * priorities.length)];
-  const tableNumber =
-    tableNumbers[Math.floor(Math.random() * tableNumbers.length)];
   const orderNumber =
     orderNumbers[Math.floor(Math.random() * orderNumbers.length)];
   const price = randomDishes.reduce((a,b) => a + b.price, 0);
@@ -305,7 +303,7 @@ export const generateRandomOrder = (): Order => {
     id: `order_${Date.now()}`,
     price,
     orderNumber,
-    tableNumber,
+    isDelivery: true,
     status: "НОВЫЙ",
     priority,
     dishes: randomDishes,

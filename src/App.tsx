@@ -17,12 +17,12 @@ function App() {
     const initializeApp = async () => {
       try {
         setLoading(true);
-          try {
-            await socketService.connect("wss://shaurma-jan.ru/v1/admin/active_assembly_orders");
-            console.log("Connected to real socket server");
-          } catch (error) { 
-            console.log("Failed to connect to socketService");
-          }
+        try {
+          await socketService.connect("ws://localhost:8080");
+          console.log("Connected to real socket server");
+        } catch (error) {
+          console.log("Failed to connect to socketService");
+        }
         setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize app:", error);

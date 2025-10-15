@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {Order, OrderStatus} from "../types";
 import {useOrderStore} from "../store/orderStore";
 import {socketService} from "../services/socketService";
@@ -42,11 +42,12 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
     const getElapsedTime = (): string => {
         const now = new Date();
         const created = new Date(order.createdAt);
-        const elapsed = Math.floor(
+        let elapsed = Math.floor(
             (now.getTime() - created.getTime()) / (1000 * 60)
         );
 
         if (elapsed < 60) {
+            if (elapsed < 0) elapsed = 0;
             return `${elapsed} мин`;
         } else {
             const hours = Math.floor(elapsed / 60);
@@ -71,7 +72,7 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
     };
 
     const handleAcceptOrder = () => {
-        socketService.acceptOrder(order.id);
+      socketService.acceptOrder(order.id)
     };
 
     const handleDishToggle = (dishId: string, isReady: boolean) => {
@@ -83,7 +84,9 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
     };
 
     const handleMarkReady = () => {
-        socketService.markOrderReady(order.id);
+        socketService.markOrderReady(order.id).catch((e) => {
+          // TODO: добавить уведомляшку
+        })
     };
 
     const handleIssueOrder = () => {
@@ -115,14 +118,15 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
             <div className="order-card__header">
                 <div className="order-info">
                     <h3 className="order-number">Заказ #{order.orderNumber}</h3>
+                    <span className="time-info">{order.isDelivery ? "🚚 Доставка" : "🤚 Самовывоз"}</span>
                     <div className="order-meta">
                         <span className="time-info">
-              Создан {formatTime(order.createdAt)}
-            </span>
+                          Создан {formatTime(order.createdAt)}
+                        </span>
                         {order.acceptedAt && (
                             <span className="time-info">
-                • Принят {formatTime(order.acceptedAt)}
-              </span>
+                              • Принят {formatTime(order.acceptedAt)}
+                            </span>
                         )}
                     </div>
                 </div>
@@ -213,9 +217,9 @@ const OrderCard: React.FC<OrderCardProps> = ({order}) => {
 
                 {order.status === "В РАБОТЕ" && !allDishesReady && (
                     <div className="progress-info">
-            <span className="text-muted">
-              Готово блюд: {order.dishes.filter((d) => d.isReady).length} из {order.dishes.length}
-            </span>
+                      <span className="text-muted">
+                        Готово блюд: {order.dishes.filter((d) => d.isReady).length} из {order.dishes.length}
+                      </span>
                     </div>
                 )}
             </div>

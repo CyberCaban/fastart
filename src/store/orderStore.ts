@@ -92,19 +92,12 @@ export const useOrderStore = create<OrderStore>()(
               if (!filters.priority.includes(order.priority)) return false;
             }
 
-            if (
-              filters.tableNumber &&
-              order.tableNumber !== filters.tableNumber
-            ) {
-              return false;
-            }
-
             if (filters.searchQuery) {
               const query = filters.searchQuery.toLowerCase();
               const matchesOrderNumber = order.orderNumber
                 .toLowerCase()
                 .includes(query);
-              const matchesTable = order.tableNumber.toString().includes(query);
+              const matchesTable = order.isDelivery.toString().includes(query);
               if (!matchesOrderNumber && !matchesTable) return false;
             }
 

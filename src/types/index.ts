@@ -21,7 +21,7 @@ export interface Order {
   id: string;
   price: number;
   orderNumber: string;
-  tableNumber: number;
+  isDelivery: boolean;
   status: OrderStatus;
   priority: OrderPriority;
   dishes: Dish[];
