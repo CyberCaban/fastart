@@ -387,6 +387,7 @@
 
 .dish-ready {
     user-select: none;
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -666,7 +667,7 @@
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -694,11 +695,11 @@
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .active-stats-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .filters-section {
@@ -748,7 +749,7 @@
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .active-stats__grid {

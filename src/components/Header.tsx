@@ -1,15 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {useOrderStore} from "../store/orderStore";
 import {socketService} from "../services/socketService";
 
+const ONE_MIN = 60000;
 const Header: React.FC = () => {
     const {
         stats,
         socketConnected,
         getActiveOrders,
         orders,
-        clearStore
+        clearStore,
+        getAvgTime,
     } = useOrderStore();
+    const [, setTime] = useState(new Date())
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setTime(new Date())
+      }, ONE_MIN)
+
+      return () => {
+        clearInterval(interval)
+      }
+    }, [])
 
     const handleEmergencyStop = () => {
         if (stats.isKitchenOpen) {
@@ -92,7 +105,6 @@ const Header: React.FC = () => {
         </button>: null
     }
 
-
     return (
         <header className="header">
             <div className="header__top">
@@ -147,20 +159,20 @@ const Header: React.FC = () => {
                                 <div className="stat-label">Выполнено</div>
                             </div>
                         </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">⏳</div>
-                            <div className="stat-content">
-                                <div className="stat-value text-accent">
-                                    {stats.pendingToday}
-                                </div>
-                                <div className="stat-label">В ожидании</div>
-                            </div>
-                        </div>
+                        {/* <div className="stat-card"> */}
+                        {/*     <div className="stat-icon">⏳</div> */}
+                        {/*     <div className="stat-content"> */}
+                        {/*         <div className="stat-value text-accent"> */}
+                        {/*             {stats.pendingToday} */}
+                        {/*         </div> */}
+                        {/*         <div className="stat-label">В ожидании</div> */}
+                        {/*     </div> */}
+                        {/* </div> */}
                         <div className="stat-card">
                             <div className="stat-icon">⏱️</div>
                             <div className="stat-content">
                                 <div className="stat-value text-accent">
-                                    {stats.averagePreparationTime} мин
+                                    {((stats.totalPreparationTime / stats.preparedToday) / 60000).toFixed(2)} мин
                                 </div>
                                 <div className="stat-label">Среднее время</div>
                             </div>

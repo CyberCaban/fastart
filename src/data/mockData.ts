@@ -4,7 +4,7 @@ import { Order, KitchenStats, Dish } from "../types";
 export const mockDishes: Dish[] = [
   {
     id: "1",
-      price: 229,
+    price: 229,
     name: "Борщ украинский",
     quantity: 2,
     isReady: false,
@@ -13,7 +13,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "2",
-      price: 149,
+    price: 149,
     name: "Котлета по-киевски",
     quantity: 1,
     isReady: false,
@@ -22,7 +22,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "3",
-      price: 250,
+    price: 250,
     name: "Салат Цезарь",
     quantity: 1,
     isReady: false,
@@ -31,7 +31,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "4",
-      price: 499,
+    price: 499,
     name: "Стейк Рибай",
     quantity: 1,
     isReady: false,
@@ -40,7 +40,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "5",
-      price: 125,
+    price: 125,
     name: "Картофель фри",
     quantity: 1,
     isReady: false,
@@ -49,7 +49,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "6",
-      price: 79,
+    price: 79,
     name: "Сырный соус",
     quantity: 1,
     isReady: false,
@@ -58,7 +58,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "7",
-      price: 429,
+    price: 429,
     name: "Лазанья мясная",
     quantity: 1,
     isReady: false,
@@ -67,7 +67,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "8",
-      price: 329,
+    price: 329,
     name: "Греческий салат",
     quantity: 1,
     isReady: false,
@@ -76,7 +76,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "9",
-      price: 150,
+    price: 150,
     name: "Чесночный хлеб",
     quantity: 4,
     isReady: false,
@@ -85,7 +85,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "10",
-      price: 469,
+    price: 469,
     name: "Пицца Маргарита",
     quantity: 2,
     isReady: false,
@@ -94,7 +94,7 @@ export const mockDishes: Dish[] = [
   },
   {
     id: "11",
-      price: 150,
+    price: 150,
     name: "Паста Карбонара",
     quantity: 2,
     isReady: false,
@@ -115,7 +115,7 @@ export const mockOrders: Order[] = [
     dishes: [
       {
         id: "1",
-          price: 150,
+        price: 150,
         name: "Борщ украинский",
         quantity: 2,
         isReady: false,
@@ -123,7 +123,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "2",
-          price: 499,
+        price: 499,
         name: "Котлета по-киевски",
         quantity: 1,
         isReady: false,
@@ -131,7 +131,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "3",
-          price: 329,
+        price: 329,
         name: "Салат Цезарь",
         quantity: 1,
         isReady: false,
@@ -152,7 +152,7 @@ export const mockOrders: Order[] = [
     dishes: [
       {
         id: "4",
-          price: 204,
+        price: 204,
         name: "Стейк Рибай",
         quantity: 1,
         isReady: true,
@@ -160,7 +160,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "5",
-          price: 945,
+        price: 945,
         name: "Картофель фри",
         quantity: 1,
         isReady: false,
@@ -168,7 +168,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "6",
-          price: 125,
+        price: 125,
         name: "Сырный соус",
         quantity: 1,
         isReady: true,
@@ -190,7 +190,7 @@ export const mockOrders: Order[] = [
     dishes: [
       {
         id: "7",
-          price: 241,
+        price: 241,
         name: "Лазанья мясная",
         quantity: 1,
         isReady: true,
@@ -198,7 +198,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "8",
-          price: 353,
+        price: 353,
         name: "Греческий салат",
         quantity: 1,
         isReady: true,
@@ -206,7 +206,7 @@ export const mockOrders: Order[] = [
       },
       {
         id: "9",
-          price: 150,
+        price: 150,
         name: "Чесночный хлеб",
         quantity: 4,
         isReady: true,
@@ -230,7 +230,7 @@ export const mockOrders: Order[] = [
     dishes: [
       {
         id: "10",
-          price: 325,
+        price: 325,
         name: "Пицца Маргарита",
         quantity: 2,
         isReady: true,
@@ -255,7 +255,7 @@ export const mockOrders: Order[] = [
     dishes: [
       {
         id: "11",
-          price: 450,
+        price: 450,
         name: "Паста Карбонара",
         quantity: 2,
         isReady: false,
@@ -277,6 +277,8 @@ export const mockStats: KitchenStats = {
   pendingToday: 62,
   averagePreparationTime: 18,
   isKitchenOpen: true,
+  totalPreparationTime: 4.12,
+  preparedToday: 100
 };
 
 // Function to generate random new order
@@ -297,7 +299,7 @@ export const generateRandomOrder = (): Order => {
   const priority = priorities[Math.floor(Math.random() * priorities.length)];
   const orderNumber =
     orderNumbers[Math.floor(Math.random() * orderNumbers.length)];
-  const price = randomDishes.reduce((a,b) => a + b.price, 0);
+  const price = randomDishes.reduce((a, b) => a + b.price, 0);
 
   return {
     id: `order_${Date.now()}`,
