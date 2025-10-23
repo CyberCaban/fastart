@@ -28,11 +28,11 @@ const StatsPanel: React.FC = () => {
   const avgPrepTime =
     completedOrders.length > 0
       ? Math.round(
-          completedOrders.reduce(
-            (sum, order) => sum + (order.actualTime || 0),
-            0
-          ) / completedOrders.length
-        )
+        completedOrders.reduce(
+          (sum, order) => sum + (order.actualTime || 0),
+          0
+        ) / completedOrders.length
+      )
       : stats.averagePreparationTime;
 
   return (

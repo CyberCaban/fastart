@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import type { Order, KitchenStats, SocketEvents, Dish, OrderStatus } from "../types";
+import { type Order, type Dish, type OrderStatus, tryExpr } from "../types";
 import { useOrderStore } from "../store/orderStore";
 import axios from "axios";
 
@@ -182,7 +182,7 @@ class SocketService {
     }, delay);
   }
 
-  acceptOrder(orderId: string){
+  acceptOrder(orderId: string) {
     if (this.socket?.readyState !== WebSocket.OPEN) {
       useOrderStore.getState().setError("Нет соединения с сервером");
       return;
@@ -215,13 +215,11 @@ class SocketService {
       return;
     }
 
-    try {
-      axios.put(`${this.adminUrl}/assemble/${orderId}`, { password: this.password })
-    } catch (e) {
-      return e as Error
-    }
+    const [, error] = tryExpr(() => 
+      axios.put(`${this.adminUrl}/assemble/${orderId}`, { password: this.password }))
+    if (error) return error
 
-    useOrderStore.getState().markOrderReady(orderId);
+    if (error === null) useOrderStore.getState().markOrderReady(orderId);
   }
 
   async issueOrder(orderId: string) {

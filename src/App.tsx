@@ -18,7 +18,8 @@ function App() {
       try {
         setLoading(true);
         try {
-          await socketService.connect("ws://localhost:8080");
+          const url = !import.meta.env.DEV ? "ws://localhost:8080" : "wss://shaurma-jan.ru/v1/admin/active_assembly_orders";
+          await socketService.connect(url);
           console.log("Connected to real socket server");
         } catch (error) {
           console.log("Failed to connect to socketService");

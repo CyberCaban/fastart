@@ -41,26 +41,8 @@ export interface KitchenStats {
   pendingToday: number;
   averagePreparationTime: number;
   isKitchenOpen: boolean;
-}
-
-export interface SocketEvents {
-  "order:new": (order: Order) => void;
-  "order:updated": (order: Order) => void;
-  "order:deleted": (orderId: string) => void;
-  "stats:updated": (stats: KitchenStats) => void;
-  "kitchen:status": (isOpen: boolean) => void;
-  error: (error: { message: string; code?: string }) => void;
-
-  "order:accept": (orderId: string) => void;
-  "order:ready": (orderId: string) => void;
-  "order:issue": (orderId: string) => void;
-  "order:cancel": (orderId: string, reason?: string) => void;
-  "order:dish:ready": (orderId: string, dishId: string) => void;
-  "order:dish:unready": (orderId: string, dishId: string) => void;
-  "kitchen:emergency_stop": () => void;
-  "kitchen:reopen": () => void;
-
-  "message": (message: string) => void;
+  totalPreparationTime: number;
+  preparedToday: number;
 }
 
 export interface OrderFilters {
@@ -97,6 +79,7 @@ export interface OrderStore extends AppState {
   getActiveOrders: () => Order[];
   getHistoryOrders: () => Order[];
   getOrderById: (id: string) => Order | undefined;
+  getAvgTime: () => number;
 
   acceptOrder: (orderId: string) => void;
   markDishReady: (orderId: string, dishId: string) => void;
@@ -106,4 +89,14 @@ export interface OrderStore extends AppState {
   cancelOrder: (orderId: string, reason?: string) => void;
   stopKitchen: () => void;
   openKitchen: () => void;
+}
+
+export type Result<T, E = Error> = [T, null] | [null, E];
+export function tryExpr<T>(fallibleFn: () => T): Result<T, Error> {
+  try {
+    const result = fallibleFn()
+    return [result, null]
+  } catch (e) {
+    return [null, e] as [null, Error]
+  }
 }

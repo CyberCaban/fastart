@@ -14,6 +14,8 @@ const initialStats: KitchenStats = {
   completedToday: 0,
   pendingToday: 0,
   averagePreparationTime: 0,
+  totalPreparationTime: 0,
+  preparedToday: 0,
   isKitchenOpen: true,
 };
 
@@ -43,13 +45,17 @@ export const useOrderStore = create<OrderStore>()(
             pendingToday: 0,
             averagePreparationTime: 0,
             isKitchenOpen: false,
+            totalPreparationTime: 0,
+            preparedToday: 0,
           }
         }),
 
         addOrder: (order) =>
           set((state) => ({
             orders: [order, ...state.orders.filter((o) => o.id !== order.id)],
+            stats: { ...state.stats, ordersToday: state.stats.ordersToday + 1 }
           })),
+
 
         updateOrder: (orderId, updates) =>
           set((state) => ({
@@ -168,7 +174,7 @@ export const useOrderStore = create<OrderStore>()(
             ? new Date(order.acceptedAt)
             : new Date();
           const actualTime = Math.round(
-            (new Date(completedAt).getTime() - acceptedAt.getTime()) / (1000 * 60)
+            (new Date(completedAt).getTime() - acceptedAt.getTime())
           );
 
           get().updateOrder(orderId, {
@@ -176,6 +182,10 @@ export const useOrderStore = create<OrderStore>()(
             completedAt,
             actualTime,
           });
+          set((state) => ({stats: { ...state.stats, 
+            totalPreparationTime: state.stats.totalPreparationTime + actualTime,
+            preparedToday: state.stats.preparedToday + 1
+          }}))
         },
 
         issueOrder: (orderId) => {
@@ -186,6 +196,25 @@ export const useOrderStore = create<OrderStore>()(
             status: "ВЫДАНО",
             issuedAt: new Date().toISOString(),
           });
+          set((state) => ({
+            stats: { ...state.stats, completedToday: state.stats.completedToday + 1 }
+          }))
+        },
+
+        getAvgTime: () => {
+          const completedOrders = get().getHistoryOrders().filter(
+            (order) => order.status === "ГОТОВО" && order.actualTime
+          );
+          const avgPrepTime =
+            completedOrders.length > 0
+              ? Math.round(
+                completedOrders.reduce(
+                  (sum, order) => sum + (order.actualTime || 0),
+                  0
+                ) / completedOrders.length
+              )
+              : get().stats.averagePreparationTime;
+          return avgPrepTime
         },
 
         cancelOrder: (orderId, reason) => {
