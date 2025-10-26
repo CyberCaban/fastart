@@ -284,7 +284,6 @@ export const mockStats: KitchenStats = {
 // Function to generate random new order
 export const generateRandomOrder = (): Order => {
   const orderNumbers = ["1006", "1007", "1008", "1009", "1010"];
-  const tableNumbers = [1, 2, 4, 6, 9, 10, 11, 13, 14, 15];
   const priorities: ("ОБЫЧНЫЙ" | "СРОЧНЫЙ")[] = ["ОБЫЧНЫЙ", "СРОЧНЫЙ"];
 
   const randomDishes = mockDishes

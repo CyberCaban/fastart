@@ -11,6 +11,7 @@ const Header: React.FC = () => {
     orders,
     clearStore,
     getAvgTime,
+    resetCredentials
   } = useOrderStore();
   const [, setTime] = useState(new Date())
 
@@ -110,6 +111,8 @@ const Header: React.FC = () => {
     else return time.toFixed(2)
   }, [stats.totalPreparationTime, stats.preparedToday])
 
+  const handleResetCredentials = () => resetCredentials()
+
   return (
     <header className="header">
       <div className="header__top">
@@ -121,6 +124,7 @@ const Header: React.FC = () => {
               style={{ backgroundColor: getStatusColor() }}
             />
             <span className="text-muted">{getStatusText()}</span>
+            {!socketConnected ? <button onClick={handleResetCredentials}>Сбросить данные для входа</button> : null}
           </div>
         </div>
 

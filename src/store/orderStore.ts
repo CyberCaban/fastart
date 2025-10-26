@@ -36,9 +36,14 @@ export const useOrderStore = create<OrderStore>()(
         error: undefined,
         socketConnected: false,
 
+        setCredentials: (shop_id, password) => set({ shop_id, password }),
+
+        resetCredentials: () => set({ shop_id: null, password: null }),
+
         setOrders: (orders) => set({ orders }),
 
         clearStore: () => set({
+          shop_id: null, password: null,
           orders: [], stats: {
             ordersToday: 0,
             completedToday: 0,
@@ -182,10 +187,13 @@ export const useOrderStore = create<OrderStore>()(
             completedAt,
             actualTime,
           });
-          set((state) => ({stats: { ...state.stats, 
-            totalPreparationTime: state.stats.totalPreparationTime + actualTime,
-            preparedToday: state.stats.preparedToday + 1
-          }}))
+          set((state) => ({
+            stats: {
+              ...state.stats,
+              totalPreparationTime: state.stats.totalPreparationTime + actualTime,
+              preparedToday: state.stats.preparedToday + 1
+            }
+          }))
         },
 
         issueOrder: (orderId) => {

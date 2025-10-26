@@ -60,9 +60,13 @@ export interface AppState {
   isLoading: boolean;
   error?: string;
   socketConnected: boolean;
+  shop_id: number | null;
+  password: string | null;
 }
 
 export interface OrderStore extends AppState {
+  setCredentials: (shop_id: number, password: string) => void;
+  resetCredentials: () => void;
   setOrders: (orders: Order[]) => void;
   clearStore: () => void;
   addOrder: (order: Order) => void;

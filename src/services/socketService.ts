@@ -1,4 +1,3 @@
-import { io, Socket } from "socket.io-client";
 import { type Order, type Dish, type OrderStatus, tryExpr } from "../types";
 import { useOrderStore } from "../store/orderStore";
 import axios from "axios";
@@ -60,10 +59,15 @@ class SocketService {
   private maxReconnectAttempts = 1000;
   private reconnectDelay = ONE_SECOND;
   private isConnecting = false;
-  private shop_id = +import.meta.env.VITE_SHOP_ID;
-  private password = import.meta.env.VITE_PASSWORD;
+  private shop_id: null | number = null
+  private password: null | string = null
   private wsUrl: string | null = null;
   private adminUrl = import.meta.env.VITE_API_URL;
+
+  setCredentials(shop_id: number, password: string) {
+    this.shop_id = shop_id
+    this.password = password
+  }
 
   connect(url: string): Promise<void> {
     this.wsUrl = url;
@@ -99,6 +103,7 @@ class SocketService {
 
         this.socket.addEventListener("open", () => {
           console.log("Connected to kitchen socket server");
+          if (this.shop_id === null || this.password === null) throw Error("Не установлен идентификатор магазина и/или пароль")
           this.socket?.send(JSON.stringify({ shop_id: this.shop_id, password: this.password }));
           this.reconnectAttempts = 0;
           this.isConnecting = false;
@@ -215,7 +220,7 @@ class SocketService {
       return;
     }
 
-    const [, error] = tryExpr(() => 
+    const [, error] = tryExpr(() =>
       axios.put(`${this.adminUrl}/assemble/${orderId}`, { password: this.password }))
     if (error) return error
 
@@ -255,6 +260,7 @@ class SocketService {
       return;
     }
 
+    if (this.shop_id === null) throw Error("Идентификатор магазина не установлен")
     this.kitchenCloseRequest(this.shop_id.toString())
     useOrderStore.getState().stopKitchen();
   }
@@ -265,6 +271,7 @@ class SocketService {
       return;
     }
 
+    if (this.shop_id === null) throw Error("Идентификатор магазина не установлен")
     this.kitchenOpenRequest(this.shop_id.toString())
     useOrderStore.getState().openKitchen();
   }
